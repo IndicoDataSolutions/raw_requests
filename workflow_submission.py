@@ -57,10 +57,13 @@ def workflow_submission_request(auth_cookie, query, variables):
     return response
 
 
-def main(workflow_id, file_data, auth_cookie):
+def main(input_data):
+    workflow_id = input_data["workflow_id"]
+    file_data = input_data["uploaded_files"]
+    refresh_token = input_data["refresh_token"]
     query, variables = workflow_query_builder(workflow_id, file_data)
-    response = workflow_submission_request(auth_cookie, query, variables)
-
+    response = workflow_submission_request(refresh_token, query, variables)
+    return {"response": response}
 
 # if __name__ == "__main__":
 #     with API_TOKEN_PATH.open("r") as f:

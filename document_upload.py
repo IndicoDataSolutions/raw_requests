@@ -4,7 +4,7 @@ import json
 
 import requests
 
-# from get_refresh_token import get_auth_token
+# from get_refresh_token import get_refresh_token
 
 """
 TODO:
@@ -54,15 +54,22 @@ def process_response(uploaded_files):
     return files
 
 
-def main(filepath, auth_cookie):
-    files = upload_document(filepath, auth_cookie)
+def main(input):
+    filepath = input["filepath"]
+    refresh_token = input["refresh_token"]
+    files = upload_document(filepath, refresh_token)
     uploaded_files = process_response(files)
+    return {"uploaded_files": uploaded_files}
 
 
 # if __name__ == "__main__":
 #     with API_TOKEN_PATH.open("r") as f:
 #         api_token = f.read().strip()
 
-#     auth_cookie = get_auth_token(api_token)
+#     refresh_token = get_refresh_token(api_token)
 #     filepath = Path("/Users/fitz/Downloads/sample.pdf")
-#     main(filepath, auth_cookie)
+#     input_data = {
+#         "refresh_token": refresh_token,
+#         "filepath": filepath
+#     }
+#     main(input_data)
