@@ -1,10 +1,10 @@
-from contextlib import contextmanager
 from pathlib import Path
 import json
+import base64
 
 import requests
 
-# from get_refresh_token import get_refresh_token
+# from get_refresh_token import get_auth_token
 
 """
 TODO:
@@ -15,25 +15,17 @@ TODO:
 
 
 HOST = "https://app.indico.io"
-API_TOKEN_PATH = Path("/Users/fitz/Documents/api_tokens/indico_api_token.txt")
+# API_TOKEN_PATH = Path("/Users/fitz/Documents/api_tokens/indico_api_token.txt")
 
-@contextmanager
-def handle_file(filepath):
-    f = filepath.open("rb")
-    file_dict = {"files": {filepath.stem: f}}
-    yield file_dict
-    f.close()
-
-
-def upload_document(filepath, auth_cookie):
+def upload_document(file_content, filepath, auth_cookie):
     url = f"{HOST}/storage/files/store"
-    with handle_file(filepath) as file_data:
-        response = requests.post(
-            url,
-            stream=True,
-            cookies=auth_cookie,
-            **file_data,
-        )
+    file_data = {"files": {filepath.stem: file_content}}
+    response = requests.post(
+      url,
+      stream=True,
+      cookies=auth_cookie,
+      **file_data,
+    )
     return response.json()
 
 
@@ -54,22 +46,10 @@ def process_response(uploaded_files):
     return files
 
 
-def main(input):
-    filepath = input["filepath"]
-    refresh_token = input["refresh_token"]
-    files = upload_document(filepath, refresh_token)
+def main(input_data):
+    filepath = Path(input_data["filepath"])
+    file_content = base64.b64decode(input_data["file_content"])
+    refresh_token = {"auth_token": input_data["refresh_token"]}
+    files = upload_document(file_content, filepath, refresh_token)
     uploaded_files = process_response(files)
-    return {"uploaded_files": uploaded_files}
-
-
-# if __name__ == "__main__":
-#     with API_TOKEN_PATH.open("r") as f:
-#         api_token = f.read().strip()
-
-#     refresh_token = get_refresh_token(api_token)
-#     filepath = Path("/Users/fitz/Downloads/sample.pdf")
-#     input_data = {
-#         "refresh_token": refresh_token,
-#         "filepath": filepath
-#     }
-#     main(input_data)
+    return {"uploaded_files": json.dumps(uploaded_files)}
